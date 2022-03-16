@@ -1,0 +1,653 @@
+
+
+springboot：由于在spring和springmvc中需要用到大量的xml配置文件，为了解决这一问题转而使用springboot。
+springboot相当于是框架已经将配置文件给写好了，可以直接拿来用
+
+而代替配置文件的就是javaconfig类
+在使用过程中需要用到两个注解：
+1）@Configuration：放在一个类的上面，表示这个类是作为配置文件使用
+
+2）@Bean：声明对象，将对象放入容器中
+
+3）ImportRespurce：是导入xml配置配置文件。在类之上
+
+4）PropertyResource：读取properties属性配置文件的
+使用方法：1、在resource目录下创建properties文件，使用K=V格式
+	2、在PropertyResource指定properties文件位置
+	3、使用@Value(value = ${key})来获取数据
+@ComponentScan(basePackage = "xxx" )：读取xxxbean容器
+
+
+springboot特性：
+创建独立的 Spring 应用程序
+
+直接嵌入 Tomcat、Jetty 或 Undertow（无需部署 WAR 文件）
+
+提供starter起步依赖项以简化您的构建配置
+比如在使用Mybatis框架的时候，需要在spring的项目中，配置Mybatis对象SqlSessionFactory，Dao的代理对象。但是在springboot中，只需要在
+pom.xml配置文件中加入mybatis-spring-boot-starter依赖就可以使用了
+
+尽可能自动配置 Spring 和 3rd 方库
+
+提供生产就绪功能，例如指标、健康检查和外部化配置
+
+完全无需代码生成，无需 XML 配置
+
+
+springboot入门：
+创建springboot项目：
+第一种：使用spring提供的初始化器
+第二种：使用国内提供的sptingboot初始化器具
+
+
+@SpringBootApplication注解是由 @SpringbootConfiguratiob、@EnableAutoConfiguaration、@ComponrntScan三个注解联合构成，所以它包含了这三
+个注解的全部功能 
+1、@SpringbootConfiguration：有该注解的类就可以当作配置文件来使用，可以使用Bean声明对象注入到容器
+
+2、@EnableAutoConfiguaration：启动自动配置，把java对象配置好，注入到spring容器中。例如把mybatis对象创建好，在放到容器中
+
+3、@ComponrntScan：注解扫描器，等同于spring中的注解扫描器@ComponentScan(basePackage = "xxx" )
+它扫描的注解是当前类包和它的子包下的
+
+
+
+
+SpringBoot的配置文件：
+名称：application（唯一指定）
+扩展名：properties（k = v）和yml（k：v）
+也就是说使用application.properties或者application.yml
+
+例子1：application.properties格式
+#设置tomcat的端口号（默认是8080）
+server.port=8082
+#设置上下文的路径（默认是/）
+server.servlet.context-path=/myAppPath
+
+例子2：application.yml
+server:
+  port: 8085
+  servlet:
+    context-path: /qqzwork
+这个是有层次的。注意：和后面的内容有空格
+
+多环境配置：有开发环境，测试环境，上线环境
+使用多环境配置文件，可以方便切换不同的配置
+使用方式：创建多个配置文件，名称规则：application-环境名称.properties或者.yml
+开发人员一般是-dev,测试一般是-text
+
+无论有多少个配置文件，最高优先级一定是application.properties这个配置文件，所以多环境配置文件就是在application.properties这个配置文件中去指定要读
+取的目标配置文件，语法是：=后面是设置的-xxx中的xxx
+#设置激活哪个配置文件：
+spring.profiles.active=dev
+
+
+@ConfigurationProperties注解使用：prefix是设置配置文件中前缀名，放在类名上
+
+User类如下：
+@Component
+@ConfigurationProperties(prefix = "users")
+public class User {
+    private String name;
+    private Integer password;
+    private String url;
+}
+
+
+
+properties配置文件中信息如下
+users.name=root
+users.password=123456
+users.url=com.mysql.cj.jdbc.Driver
+
+@ConfigurationProperties(prefix = "users")
+
+这个注解的意思就是通过注解中设置的前缀名去寻找配置文件中名字对应的数据，当前缀匹配到的时候，在将类名的数据和配置文件前缀.xxx进行比对
+当配置文件中的xxx和注解类的成员对应的时候，赋值
+
+springboot中并不推荐使用jsp，因为可以使用Thymeleaf模板去代替它
+1、使用jsp需要加入处理jsp依赖负责编译jsp
+
+<!--处理jsp依赖-->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+        </dependency>
+
+2、如果还需要使用servlet，还需要添加jsp的依赖
+3、还有就是添加一个jsp的目录，一般叫做wabapp
+4、然后再pom文件中指定jsp文件编译后存放的目录META-INF/resources
+
+<!--指定jsp编译后的存方目录-->
+        <resources>
+            <resource>
+                <!--jsp原目录-->
+                <directory>src/main/webapp</directory>
+                <!--指定编译后的目录-->
+                <targetPath>META-INF/resources</targetPath>
+                <!--指定处理的目录和文件-->
+                <includes>
+                    <include>**/*.*</include>
+                </includes>
+            </resource>
+        </resources>
+
+5、创建Controller，访问jsp
+6、在application.properties文件中配置视图解析器
+
+#视图解析器
+#前缀 / = src/main/webapp
+spring.mvc.view.prefix=/
+spring.mvc.view.suffix=.jsp
+
+
+手工获取ApplicationContext容器对象
+通过SpringApplication.run(Application.class,args);返回值ConfigurableApplicationContext来获取容器
+ConfigurableApplicationContext：是一个接口，继承Application的子接口
+
+
+CommandLineRunner：是一个接口，里面的唯一方法：run。返回值是字符串
+ApplicationRunner：是一个接口，里面有唯一方法run。返回值是ApplicationArguments
+这两个接口中的run方法都是在容器对象创建好之后执行
+
+
+
+WEB组件：
+1、拦截器：是springmvc中的一种对象，能够拦截Controller的请求
+创建类实现Springmvc种的HandlerInterceptor接口
+在springmvc配置文件种，声明拦截器
+
+在springBoot中创建拦截器：
+创建拦截器的类：
+public class LoginInInterceptor implements HandlerInterceptor {
+
+    /**
+     *
+     * @param request
+     * @param response
+     * @param handler 被拦截的控制器对象
+     * @return boolean;true是能别controller处理，false就拦截
+     * @throws Exception
+     */
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
+        System.out.println("执行了Loginin这个方法");
+        return true;
+    }
+}
+
+将拦截器注入容器：
+@Configuration
+public class MyAppConfig implements WebMvcConfigurer {
+
+
+    //添加拦截器对象，注入到容器中
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        //创建拦截器对象
+        HandlerInterceptor interceptor = new LoginInInterceptor();
+        String path [] = {"/user/**"};
+        String excludePath [] = {"/user/login"};
+
+        //将创建好的拦截器对象放入registry拦截器容器中，addPathPatterns(path)拦截path对象
+        //excludePathPatterns(excludePath)不拦截excludePath对象
+        registry.addInterceptor(interceptor).
+                addPathPatterns(path).
+                excludePathPatterns(excludePath);
+    }
+}
+
+测试拦截器：
+@Controller
+@RequestMapping("/user")
+public class BootController {
+
+    @RequestMapping("/account")
+    @ResponseBody
+    public String userAccount(){
+        return "访问user/account地址";
+    }
+
+    @RequestMapping("/login")
+    @ResponseBody
+    public String userLogin(){
+        return "访问user/login地址";
+    }
+}
+
+
+
+注册sevrlet需要使用对象ServletRegistrationBean
+
+
+
+过滤器Filter
+在springboot中使用过滤器：
+1、创造Filter对象：创建时需要继承Filter类
+2、注册Filter，返回对象：FilterRegistrationBean对象
+
+字符集过滤器：CharacterEncodingFilter
+当设置完一切后，还需要在application.properties配置文件中去设置：server.servlet.encoding.enable=false
+
+通过application配置文件中更改编码格式：server.servlet.encoding.chaset=utf-8
+
+
+
+通过springboot操作数据库
+使用mybatis框架
+步骤：
+1、mybatis起步依赖：完成自动配置
+2、指定src/main/java中的xml文件包含到classpath中
+3、创建实体类
+4、创建dao接口
+5、创建dao接口对应的mapper文件。xml文件，写sql语句
+6、创建service层对象，创建studentservice接口和实现类
+7、创建controller对象
+8、写application配置文件
+
+
+@Mapper注解：
+/**
+ * 告诉mybaits这是dao接口,创建代理对象
+ */
+@Mapper
+public interface StudentDao {
+
+    Student selectStudentById(@Param("stuId") Integer id);
+    Student selectStudent();
+}
+
+但是这个方法在dao接口很多的时候会很繁琐，所以springboot有一个新的注解，叫@MapperScan(basePackages = "xxx")xxx为包路径
+这个注解的意思是：将这个包下的所有接口都加上mapper注解
+
+将xml文件读取到classpath目录下：
+1、<resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+        </resources>
+2、在resources目录下创建mapper文件夹
+然后在application配置文件中标注启动mapper文件夹中的内容mybatis.mapper-locations=classpath:mapper/*.xml
+
+
+springboot中事务：
+1）、管理事务对象：事务管理器（接口，有很多实现类）
+例如：jdbc或者mybatis访问数据库，使用事务管理器：DataSourceTransactionManager
+2）、声明式事务：在xml的配置文件或者注解说明事务内容
+控制事务：隔离级别，传播行为，超时时间
+3）、事务的处理方式：
+（1）、spring中的@Transactional
+（2）、aspectj框架可以在xml文件中声明事务控制的内容
+
+
+springboot中使用事务：
+1）在业务方法上加入@Transactional
+2）明确在主启动类上加上@EnableTransationManger
+
+
+
+接口架构风格RESTful：
+接口：API:API之主要目的是提供应用程序与开发人员以访问一组例程的能力，而又无需访问源码，或理解内部工作机制的细节。提供API所定
+义的功能的软件称作此API的实现。API是一种接口，故而是一种抽象。
+
+接口：可以值访问servlet，controller的url，调用其他程序的函数
+
+
+架构风格：api组织方式（样子）
+传统风格：http://localhost:8888/student/save?name=%E7%8E%8B%E4%BA%94&email=wangwu@163.com&age=29
+在地址上提供了访问资源的名称save，在其后面使用了get方式传参
+
+
+RESTful架构风格：
+1、REST（Representational State Transfer  【表现层状态转移】）：它是一种软件设计架构风格，但并不是标准
+
+优点：更简洁，更有层次感
+
+表现层状态转移：表现层就是视图层，显示 资源的。状态就是资源变化。转移：资源是可以变化的，资源能创建，new状态。资源创建后可以
+查阅资源，能看到资源内容
+
+2、REST中的要素：
+用REST表示资源和对资源的操作。在互联网中，表示一个资源或者一个操作。
+资源是使用url表示的，在互联网中，使用的图片，文本，视频都是资源
+资源是用名词表示。
+使用http中的动作，表示对资源的操作（CRUD）
+GET：查询资源
+POST：创建资源
+PUT：更新资源
+DELETE：删除资源
+
+对资源：
+查询资源：看，通过url找到资源。
+创建资源：添加资源
+更新资源：更新资源，编辑 
+删除资源：去除
+
+REST注解：
+1）@PathVariable：从url中获取数据
+2）@GetMapping：支持get请求，等同于@RequestMapping(method=Request.GET)
+3）@PostMapping：支持post请求，等同于@RequestMapping(method=Request.POST)
+4）@PutMapping：支持put请求，等同于@RequestMapping(method=Request.PUT)
+5）@DelectMapping：支持delect请求，等同于@RequestMapping(method=Request.DELECT)
+@RestController：符合注解，是@Controller和@ResponseBody组合
+
+
+PostMan：测试工具
+使用它可以测试get,post，put，delect请求
+
+
+在页面或者ajax中支持put,delect请求
+使用过滤器：org.springframework.web.filter.HiddenHttpMethodFiler
+作用：把请求中的post请求转为put或者delete
+
+实现步骤：
+1、在application配置文件中，开启HiddenHttpMethodFiler过滤器
+2、在请求页面需要包含_method参数，它的值是put,delete，但是发起这个请求是post方式
+
+代码：1、spring.mvc.hiddenmethod.filter.enabled=true
+2、<input type="hidden" name="_method" value="put">
+
+
+
+SpringBoot中使用Redis
+常用于缓存（cache）
+Redis是一个中间件，是一个独立的服务器
+java中著名的客户端：Jedis，lettuce，Redisson
+spring springboot中有一个RedisTemplate（StringRedisTemplate），处理Redis的交互
+
+然而，RedisTemplate使用的是lettuce客户端库
+
+#指定redis的host，端口号，password
+spring.redis.host=192.168.247.128
+spring.redis.port=6379
+spring.redis.password=123456
+
+
+对比RedisTemplate对象和StringRedisTemplate对象：
+StringRedisTemplate：这个对象把k，v都做为String处理，使用的是String的序列化，可读性好
+RedisTemplate：这个对象把k，v，经过序列化存到redis，k，v是序列化内容，可读性差。不能直接识别（默认序列化是java）
+设置RedisTemplate序列化：
+
+序列化：把对象转为可传输的字节过程，叫序列化。序列化的最终目的是为了对象可以跨平台存储和进项网络传输
+常见的序列化方式有：jdk（不支持跨语言），json，xml，Hessian，kryo（不支持跨语言），thrift，protostuff
+java的序列化：把java对象转为byte[]，二进制数据
+json序列化就是将对象转为json格式，或者反序列化将json转为对象
+
+序列化主要是使用redisTemplate.setValueSerializer（new xxx）xxx是序列化对象
+
+
+
+
+
+
+SpringBoot关于集成dubbo：
+1、首先是接口类
+2、是服务提供者类，然后暴露服务
+
+加入dubbo和zookeeper的依赖
+<!--dubbo依赖-->
+        <!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-spring-boot-starter -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+            <version>3.0.6</version>
+        </dependency>
+
+        <!--zookeeper注册中心依赖-->
+        <!-- https://mvnrepository.com/artifact/org.apache.dubbo/dubbo-dependencies-zookeeper -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-dependencies-zookeeper</artifactId>
+            <version>3.0.6</version>
+            <type>pom</type>
+        </dependency>
+
+
+接口实现类
+/**
+ * 使用dubbo中的注解@DubboService暴露服务
+ */
+@DubboService(interfaceClass = StudentService.class,version = "1.0.0")
+public class StudentServiceImpl implements StudentService {
+    @Override
+    public Student queryStudentByid(Integer id) {
+        Student student = new Student();
+        if(id == 1001){
+            student.setId(1001);
+            student.setName("1001-张三");
+            student.setEmail("zs1001@123.com");
+            student.setAge(22);
+        }else if(id == 1002){
+            student.setId(1002);
+            student.setName("1002-李四");
+            student.setEmail("ls1001@123.com");
+            student.setAge(32);
+        }
+        return student;
+    }
+}
+
+服务提供者的xml文件
+#配置服务的名称
+spring.application.name=studentservice-provider
+
+#配置扫描的包，扫描DubboService注解
+dubbo.scan.base-packages=com.qqzwork.service
+
+#配置Dubbo协议
+#dubbo.protocol.name=dubbo
+#dubbo.protocol.port=20881
+
+#dubbo的注册中心
+dubbo.registry.address=zookeeper://localhost:2181
+
+启动类上需要加注解
+/**
+ * @EnableDubbo启用dubbo
+ * @EnableDubboConfig
+ * @DubboComponentScan
+ */
+@SpringBootApplication
+@EnableDubbo
+public class SpringbootProvider010Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringbootProvider010Application.class, args);
+    }
+
+}
+
+由于之前的包中有了日志依赖，因此需要在zookeeper配置文件中加上，以保证日志只启动一次
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+
+
+消费者：
+消费者的controller对象：
+/**
+     * @DubboReference引用远程服务，把创建好的代理对象，注入给studentService
+     */
+    @DubboReference(interfaceClass = StudentService.class,version = "1.0.0")
+    private StudentService studentService;
+
+    @GetMapping("/query")
+    public String queryStudent(){
+        Student student = studentService.queryStudentByid(1001);
+
+        return "调用远程接口"+student;
+    }
+
+启动器也需要注解EnableDubbo
+
+application配置文件：
+#指定服务名称
+spring.application.name=consumer-application
+
+#指定注册中心
+dubbo.registry.address=zookeeper://localhost:2181
+
+
+
+
+
+
+SpringBoot模板：
+Java生态下的模板引擎有：Thymeleaf，Freemaker，Velocity，Beetl（国产）等
+
+ @GetMapping("/hello")
+    public String helloThymeleaf(HttpServletRequest request){
+
+        request.setAttribute("data","欢迎使用模板引擎Thymeleaf");
+
+        //指定视图，模板引用使用的页面（HTML）
+        return "hello";
+    }
+
+<p th:text="${data}">想显示数据</p>
+
+#这是说关闭模板缓存，可以让数据在开发过程中修改后立刻生效。默认是true
+spring.thymeleaf.cache=false
+
+#设置编码格式
+spring.thymeleaf.encoding=UTF-8
+
+#设置模板类型，默认是HTML
+spring.thymeleaf.mode=HTML
+
+#模板的前缀
+spring.thymeleaf.prefix=classpath:/templates/
+
+#模板的后缀
+spring.thymeleaf.suffix=.html
+
+表达式： 
+1、标准表达式
+语法：${key}
+作用：获取key对应的文本数据，key是request作用域的key。可以使用request.setAttribute()或者 model.addAttribute()获取
+在html中使用th:text="${key}"获取数据
+
+2、选择变量表达式（星号变量表达式）
+语法：*{key}
+作用：获取key对应的数据，*{key}需要和th:object这个属性一起使用，目的是简单获取对象的属性
+
+3、链接表达式
+语法：@{url}
+作用：表示链接
+在链接表达式中传参可以使用xxx（xxx=${xxx}）或者xxx（xxx=xxx）
+
+Thymeleaf属性：
+放在html中，就是在html属性前+th：。加上之后就是告诉使用模板引擎
+
+例如：th:each
+<div th:each="集合成员，循环的状态变量：${key}">
+	<p th:text=${集合成员}></p>
+</div>
+集合成员和状态变量是两个自定义的名称。状态变量可以不定义名字，默认是集合成员+stat
+在循环map的时候，是：
+<div th:each="集合成员，循环的状态变量：${xxxname}">
+	<p th:text=${集合成员.key}></p>
+	<p th:text=${集合成员.value}></p>
+</div>
+
+
+if：
+语法：th：if=“boolean条件”，当为真时显示内容。
+th：unless 是 th：if的相反操作
+
+switch，case
+
+例如：	
+<div th:switch=${sex}>
+	<p th:case="m">性别男</p>
+	<p th:case="f">性别女</p>
+	<p th:case="*">性别未知</p>
+</div>
+
+
+内联：
+th:line 有三个取值类型：text,javascript,none
+
+内联text:在html标签外获取表达式的值
+语法：
+例：<p>显示姓名：[[${key}]]</p>
+
+当想要在th:text中显示文字的时候，用单引号将其包括起来就可以
+字符串连接：
+1、单引号。
+2、使用双竖线：|字符串和表达式|
+例如：<p th:text="|我是${name}，我来自${city}|"></p>
+
+
+运算符：
+算术运算符：+，-，*，/ ，%
+关系比较：> ，< ，>= ，<= （gt，lt，ge，le）
+相等判断：==，!=（eq，ne）
+三元运算符：可以嵌套
+
+Thymeleaf对象：
+
+基本对象：
+1）、#request：表示HttpServletRequest对象
+2）、#session：表示HttpSession对象（这个是一个完整的方法体）
+3）、session对象：表示HttpSession对象（简化方法体中获取session值）
+
+内置工具类对象：
+1）、#dates：关于日期处理。format()方法，处理日期。显示
+2）、#numbers：数字格式化。formatCurrency()，货币格式化。formatDecimal(处理对象，显示小数点前几位，显示小数点后几位)
+3）、#strings：操作字符串。toUpperCase()大写字符串，indexOf(字符串，目标字符串)查询目标字符串位置，substring(目标字符串，截取开始位置，结束位置)
+substring（）包含开始，不包含结尾。concat(字符串，目标字符串)将目标字符串和字符串和在一起
+4）、#lists。操作list集合的。contains(aaa,bbb)判断aaa中是否包含bbb。isEmply()判断是否为空
+5）、关于？的使用，例如<p th:text="${zoo?.dog?.name}"></p>这里问号表示先判断zoo对象是不是为空，不是则执行后面的语句，dog同理
+...内置工具类不止这点。详情自查
+
+自定义模板
+模板是内容服用，定义一次，在其他模板文件中多次复用
+1、自定义模板：
+语法：th:fragment="模板名称"
+
+2、引用模板语法：
+1）、~{templatename :: selector}
+    templatename：是你模板的文件名称 。selector：自定义模板的名称
+2）、templatename :: selector
+
+对于使用模板，有包含模板（th:include），和插入模板（th:insert）
+
+
+
+
+总结注解：
+@Controller：创建控制器对象并注入容器
+@RestController：包括@Controller和@ResponseBody
+@Service：放在业务层，创建Service对象注入容器
+@Repository：放在dao层的实现类上，创建dao对象注入容器。现在基本不使用，因为Mybatis自动代理会自动生成
+@Component：创建此类对象，注入容器
+
+@Value：简单类型的赋值
+@AutoWired：引用类型赋值，支持byName，和byType，默认byType
+@Qualifer：给引用类型赋值，使用byName
+@Resource：给引用类型赋值，是来自jdk，支持byName，和byType。默认byName，如果byName失败就会使用byType
+
+@Configuration：表示这是个配置类
+@Bean
+@ImportResource：加载其他的xml配置文件，把文件的对象注入spring容器
+@PropertySource：读取properties属性配置文件的
+@ComponentScan：扫描器，指定包名，扫描注解
+@ResponseBody：告诉方法返回的是数据，不是视图
+@RequsetBody：读取请求体中的数据，读取出来后转为java对象使用
+@Transcational：处理事务。放在service实现类的方法上
+
+@SpringBootApplication：在启动类上。包含@SpringbootConfiguratiob、@EnableAutoConfiguaration、@ComponrntScan
+
+@Mapper：让mybatis找到接口，创建代理对象
+@MapperScan：指定某个包。把包中所有接口创建代理对象
+@Param：在dao接口的方法的形参前，命名参数命
+
+@DubboService：在提供者端：暴露服务
+@DubboReference：在消费者端，引用远程服务，放在属性上
+@EnableDubbo：放在主类上，表示启动dubbo

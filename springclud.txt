@@ -1,0 +1,127 @@
+配置Eureka
+在配置文件中：
+server:
+   port: 7001
+
+eureka:
+    instance:
+       hostname:localhost  #设置Eureka服务端得实例名字
+    client:
+      register-with-eureka: false #向注册中心表示是否注册自己
+      fetch-registry: false  #fetch-registry如果为false，则表示自己就是注册中心
+      service-url:  #监控页面
+         defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+
+Eureka的启动类：
+在启动类上面加入注解@EnableEurekaService
+
+
+当注册中心设置好后，你希望设注册eureka就在谁的配置文件加：
+eureka:
+    client:
+      service-url:  #监控页面
+         defaultZone: http://localhost/7001/eureka/       #这里的路径是注册中心的路径！
+    instance:
+       instance-id: springcloud-provider-dept         #如果不想使用默认名称，可以这样修改描述信息
+然后在启动类上加入注解：
+@EnableEurekaClient
+
+想要从注册中心得到你服务类的信息，首先需要加入依赖：
+spring-boot-starter-actuator
+然后再配置中心加入：
+info:
+   app.name: xxxx#xxxx是你自己设定的名字
+   company.name: xxx#设置公司名字
+
+Eureka的自我保护机制，当服务停止之后，Eureka会尝试连接30秒，当30秒都无法被相应，就会在控制端出现提示。但是此时的微服务信息不会被立
+马被清理，而是保护服务
+
+
+如果想要获得注册中心的东西，可以使用spring-cloud中的一个类，叫DiscoveryClient，使用其中的方法getInstances（xxx）可以获得注册中心某一
+个application的内容，启动类也需要注解@EnableDiscoveryClient
+
+集群的时候：
+
+
+负载均衡Ribbon：是一套客户端负载均衡的工具
+负载均衡的简单分类：
+集中式LB
+进程式LB：Ribbon就属于进程式
+
+消费者端一般需要重写RestTemplate来使用	负载均衡，定义的RestTemplate方法上加入注解@LoadBalanced就能开启Ribbon
+
+再消费者端口：
+配置文件：
+eureka:
+      register-with-eureka: false #向注册中心表示是否注册自己
+      service-ur:
+         defaultZone:xxx（xxx是你定义的服务器的名字比如； http://localhost/7001/eureka/）
+
+
+服务熔断Hystrix：是一种对雪崩效应的一种微服务链路保护机制。熔断机制的注解是；@HystrixCommand（fallbackMethod="xxx"）xxx是自定义
+的方法名，这个注解表达的意思是当，方法失败后，启动备用方法 xxx。然后在启动器上也需要加注解@EnableCircuitBreaker。还有加上依赖
+
+服务降级：
+首先创建一个类xxx来继承FallbackFactory，然后重新create方法。在service接口类上加上出街feignClient(fallbackFactory=xxx.class)
+最后在配置i文件加上：
+feign:
+   hystrix:
+       enable: true
+
+DashBoard流监控
+在消费者端口加入依赖，在启动类加入注解：@EnableHystrixDashboard
+在服务端必须有actuator依赖
+然后往想要监控的流的主启动类中加入方法
+
+@Bean
+public ServletRegistrationBean hytrixMetricsStreamServlet(){
+           ServletRegistrantionBean registrantionBean = new ServletRegistrantionBean(new hytrixMetricsStreamServlet());
+           registrantionBean .addUrlMappings("/actuator/hytrix.stream");
+           return registrantionBean ;
+}
+
+
+
+zuul：路由网关
+实现外部访问统一入口，代理，路由，过滤
+先设置配置文件
+server:
+   port: 8087
+spring:
+   application:
+       name: springcloud-zuul
+
+eureka:
+    client:
+       service-url:
+          defaultZone: (eureka注册中心的地址)
+    instance:
+       instance-id: zuul8087.com
+       prefer-ip-address: true
+
+info:
+   app.name: xxx
+
+zuul:
+    routes:
+       mydept.serviceId: xxxxxx(微服务具体的名字)
+       mydept.path: /mydept/**(设置为想要别人访问的地址)
+     ignored-services: "*"  不能再使用这个路径访问，直接忽略，隐藏全部
+
+
+
+springcloud-config
+配置文件：
+server.port=1234
+
+spring.application.name=demo-config
+spring.cloud.config.server.git.uri=https://github.com/qqzxhlcy/TextPace.git（github的http地址）
+记得注解@EnableConfigServer
+
+
+当客户端口想要获取数据的时候：
+spring.cloud.config.name=config-client  #这里的名字是你想要读取的配置文件的名字
+spring.cloud.config.profile=dev #因为是读取配置文件，所以文件里应该分配了不同级别的名字
+spring.cloud.config.label=master 
+uri:xxx

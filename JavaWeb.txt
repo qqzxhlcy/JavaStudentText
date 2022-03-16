@@ -1,0 +1,416 @@
+互联网通信模型：
+1、c/s通信模型
+c,client software；客户端软件
+客户端、服务器模式
+从服务器传回来的数据是二进制数据，由客户端软件进行编译
+
+S，server softw；服务器软件
+服务器软件获得客户端的请求，然后从服务端计算机上定位到资源文件，然后通过二进制数
+据发回客户端上
+
+C/S模型：比如微信、淘宝、客户端游戏等
+
+优点：
+1、安全度较高，只接收客户端传来的数据
+2、能够有效降低服务端计算机压力
+
+缺点：
+1、增加客户获得服务的成本
+2、更新较为频繁
+
+B/S通信模型：
+B：browser.浏览器
+1、浏览器安装在客户端计算机中
+2、可以向任意服务器中发送请求，索要文件
+3、可以将服务器返回的二进制数据解析
+
+S：server software 服务器软件
+1、服务器软件专门安装在服务端计算机上
+2、可以接收任意浏览器发送的请求
+3、自动给在服务端计算机上定位被访问的资源文件
+4、自动定义资源文件内容以二进制形式返回发送请求的浏览器上
+
+优点
+1、不会增加客户获得服务的成本
+2、几乎不会更新浏览器
+
+缺点：
+1、几乎无法对服务器计算机中资源进行保护
+2、服务端的压力巨大（B/S通信下高并发解决方案）
+
+
+共享资源文件：
+可以通过网络进行传输的文件，都叫共享资源文件
+
+Http服务器下对于贡献文件分为
+1、静态资源文件
+文件内容是固定的就是静态资源文件（写好的文本），图片，视频
+如果文件存放的不是内容而是命令，这些只能在浏览器编译于执行的文件就叫静态资源文件
+
+
+2、动态资源文件
+如果文件存放命令，并且命令不能在浏览器编译和执行，只能在服务端计算机编译执行
+这种文件就叫动态资源文件
+
+当静态文件被索要的时候，Http服务器直接通过（输出流）将静态文件中内容或者命令以
+二进制的形式推送回请求服务器
+ 
+动态文件索要时，Http服务器需要创建当前class文件的实例对象（），然后调用方法，得到
+结果之后以二进制形式发回请求服务器
+
+开发人员的职责：
+1、控制浏览器行为
+
+2、开发动态资源来解决客户端的请求
+
+
+HTML编程语言
+专门用在浏览器编译与执行的语言，以及它的学名”超文本标记式编程语言“
+
+作用：
+1、HTML语言通知浏览器将接收的数据以指定方式在窗口展示
+2、控制浏览器请求行为
+
+HTML语言语法规范：
+1、所有命令都在申明标签中。比如<br>
+2、所有的命令都是预先设计好的，不允许修改
+3、不区分大小写
+4、进行赋值时使用“”‘’区分，可以省略，但是此时属性之间必须由空格进行分离
+5、书写方式分为双目和单目标签
+双目：<tr></tr>
+单目：<br/>或者<br>
+
+
+常见的HTML标签命令：
+<html></html>包含两个子标签
+<head></head>：设置基础参数
+<body></body>：负责通知浏览器指定内容以指定方式在窗口展示
+
+<html>
+   <head>
+      <meta charset='GBK'>         
+   </head>
+   <body>
+        下午好
+   </body>
+</html>
+
+
+段落标签<p></p>
+标题标签<hx></hx>   //x是数字。从小到大字体逐渐变小
+有序标签<ol></ol>   //内容前由阿拉伯数字
+无序标签<ul><ul>    //内容前无阿拉伯数字
+其中有序与无序标签中的展示标签是<li></li>
+
+表格标签<table></table>
+表格标签中<tr></tr>是一行。<td></td>是一格
+<table border = "2" align="center"></table>这里的意思是表格边框粗细为2，位置居中
+style属性的意思是赋予颜色
+rowspan = “数字”。扩充单元格高度
+colspan =  "数字" 扩充单元格宽度
+<img src = "图片名字" title="名字 " width ="宽度" height = "高度"/ > 图片 标签
+<font></font> 字体标签
+ 
+
+浏览器发送请求的三要素：
+1、控制浏览器发送请求地址
+2、控制浏览器发送请求采用请求方式
+3、控制浏览器发送请求携带请求参数
+
+1、关于超链接标签：
+<a href = "地址">名字</a>
+超链接标签不会自动启动，需要用户点击鼠标才能进行转跳
+2、表单标签命令
+<form action="请求地址">
+      <input type="submit" value="显示内容"/>
+</form>
+
+
+控制浏览器发送请求采用请求方式：
+1、请求方式：决定浏览器发送请求时的行为
+2、浏览器可以选择的请求方式：7种
+目前只考虑（POST请求方式）和（GET请求方式）
+
+GET请求方式：
+1、发送请求时：携带的”请求参数的数量“不超过4K
+2、发送请求时：必须在浏览器地址栏将”请求信息“展示出来
+https://www.baidu.com/s?ie=utf-8&f=3&rsv_bp=1&tn=49055317_11_hao_pg&wd=html%E4%B8%ADfont%E6%A0%87%E7%AD%BE%E7%9A%84%E4%BD%9C%E7%94%A8&oq=html%25E7%259A%2584li%25E6%25A0%2587%25E7%25AD%25BE&rsv_pq=ba4ca41500193d59&rsv_t=3b23b0VzemdKtU7Lav7JccL6FRfYB5OL6cQsDJsqREOV1AmA5MF3k%2FBGmTTmqFe%2F1a0H7YmCPi5M&rqlang=cn&rsv_enter=1&rsv_dl=ts_0&rsv_sug3=16&rsv_sug1=15&rsv_sug7=100&rsv_sug2=1&rsv_btype=t&prefixsug=html%25E4%25B8%25ADfont&rsp=0&inputT=6952&rsv_sug4=8659
+这就是GET请求方式
+3、发送请求时，必须将请求参数信息保存在Http请求协议包中
+4、接收到服务器返回的资源后，必须将资源文件内容保存在浏览器缓存中
+
+POST请求方式：
+1、发送请求时。可以携带任意数量的”请求参数“
+2、发送请求时，必须在浏览器地址栏处隐藏参数信息
+3、发送请求时，必须将请求参数信息保存在Http请求协议包中
+4、禁止浏览器将返回资源文件进行保存（阅后及焚）
+
+
+超链接标签命令执行时。要求浏览器必须使用GET请求方式
+
+表单标签中存在一个method属性。通过这个属性可以要求浏览器采用队应的请求方式发送请求
+<form action = "xxxxx" method = "get"></form>
+<form action = "xxxxx" method = "post"></form>
+method的默认值是GET
+唯一能使用POST的只有使用method
+
+考虑到POST请求方式的特性，大多数网站都是拒绝接收POST请求，日常开发绝大多数都是
+GET请求
+在文件上传、发起登录验证、实时改变数据的时候使用POST
+
+请求参数的作用:
+比如：
+class Student{
+      public int add (int a,int b){
+                    int sum = a + b; 
+                    return sum;
+            }
+}
+Http服务器：
+Student s = new Student();
+s.add(100,200);    //这里调用方法的实参需要浏览起以请求参数方式提供
+
+例如：
+http://www.baidu.com?a=100&b=200      (a=100&b=200)就是浏览器发送的请求参数
+
+格式：
+浏览器发送请求时：请求地址？请求参数名1=值1%请求参数名2=2&...&
+
+浏览器发送请求参数时携带的请求参数来源：
+1、通过超链接标签命令来指定请求参数
+2、通过表单域标签命令来指定请求参数
+
+1列子：
+<a href= "http://www.baidu.com?userName="mike"&password=123>百度</a>
+这里给百度传输的数据userName是mike，passwor是123
+
+2例子：
+1）一组声明在form标签内部的标签命令
+2）提示用户填写队应的（请求参数内容）用于提供相对灵活的请求参数
+3）所有的表单域标签都有两个属性：name和value
+name属性声明请求参数名。value属性声明请求参数内容
+
+表单域标签分类：
+1、<input />标签
+
+<html>
+<body>
+<center>
+  <form action="http://www.baidu.com" >
+    <input type="text" name="userName" value="mike" /><br/>                   <!-输入文本(可见)>
+    <input type= "password" name="password" value="123" /><br/>               <!输入密码（不可见>
+    <input type="radio" name="sex" value="男">男<input type="radio" name="sex" value="女">女<br/><!radio为选择，设置名字之后会自动拒绝重复>
+    <input type="checkbox" name="jishu" value="JAVA">java<input type="checkbox" name="jishu" value="Android">android<br/>
+    <!chackbox是勾选框>
+    <input type="file" name="Myfile"><br/><!上传文件>
+    <input type="submit"><!提交>
+    <input type="reset"><!重置>
+  </form>
+</center>
+</body>
+</html>
+
+2、<select></select>:标签（下拉）
+
+<html>
+<body>
+<center>
+  <form action="http://www.baidu.com">
+    <select name="home">
+      <option value="bj">北京</option>
+      <option value="sh">上海</option>
+    </select>
+  </form>
+</center>
+</body>
+</html>
+
+3、<textarea></textarea> :多行文本框
+
+
+<textarea name = "tt" rows =10 cols =30>
+</textarea>
+
+
+大多数表单域标签value属性得默认值为空字符串‘ ’
+radio和checkbox来说默认值为on
+
+表单域标签作为请求参数条件：
+1、对于大多数表单域标签来说，只要同时满足以下两个条件就可以作为请求参数
+必须声明在form标签内部。必须要声明name属性
+
+然而对于checkbox和radio标签。不仅需要上述两个条件，还需要满足被选中的情况下才能作为参数
+表单域标签如果使用disabled和readOnly修饰，那么用户将无法更改。并且前者失去作为请求参数得条件
+disabled 设置为不可用            readOnly：当前value属性只能被看不能改
+
+
+css编程语言：一种专门在浏览器编译并执行的编程语言。用于定位浏览器中HTML标签并对
+定位的HTML标签中的“样式属性”进行统一管理
+
+
+HTML标签属性分类
+1、基本属性：
+比如id、name
+2、样式属性：
+是一个大群体，通知浏览器将HTML标签中数据在浏览器中以指定的形态出现，比如：
+<div stytle = "backgrount-color:red;color:green;width:300px;height:300px"></div>
+3、工作状态属性：
+只存在于“表单域标签”中。用于表示“表单域标签”的状态
+比如disabled、readOnly
+checke：存在于radio和checkb中，表示是否被选中
+seleteced：表示option标签是否被选中
+4、监听属性
+监听属性用户说HTML标签之间进行通信通道，监听属性
+用于监听用户在何时对当前标签进行何种操作，当指定操作产生时，监听属性将会通知浏览
+器调用对于的JavaScript方法处理当前请求
+
+css选择器：
+语法格式：
+<html>
+     <head>
+            <style type="text/css">
+                   #定位条件{
+                          “样式属性1”：“值1”；
+                          “样式属性2”：“值2”；
+                               }
+            </stype>
+     </head>
+</html>
+
+Id选择器
+<html>
+     <head>
+            <style type="text/css">
+                   #one{
+                          color ： red     <!设置id为one的字体颜色为红色>                      
+                               }
+            </stype>
+     </head>
+      <p id="one">这是一个段落标签</p>
+      <p id="two">这是一个段落标签</p>
+</html>
+
+标签类型修改器：
+<html>
+     <head>
+            <style type="text/css">
+                   标签类型{
+                          “样式属性1”：“值1”；
+                          “样式属性2”：“值2”；
+                               }
+            </stype>
+     </head>
+</html>
+比如说：
+<html>
+     <head>
+            <style type="text/css">
+                   div{
+                          color ： red     <!设置id为one的字体颜色为红色>                      
+                        }
+                   p{
+                          color ： red     <!设置id为one的字体颜色为红色>                      
+                        }
+            </stype>
+     </head>
+     <body>
+      <div>这是一个div</div>
+      <p id="one">这是一个段落标签</p>
+      <div>这是二个div</div>
+      <p id="two">这是二个段落标签</p>
+      </body>
+</html>
+
+
+层级选择器：
+HTML标签中只存在父子和兄弟关系、
+语法：
+<html>
+     <head>
+            <style type="text/css">
+                   #定位父标签条件  定位子标签条件{
+                                                                    xxxxxxxx
+                                                                     }
+            </stype>
+     </head>
+</html>
+
+自定义选择器：
+如果一组标签没有相同特征。但是需要对指定属性赋与相同内容，此时将自定义选择器绑
+定到队应标签上
+语法：
+<style type="text/css">
+                 .自定义选择器名{   xxxxx   }   <!注意加点>
+</stype>
+
+<div class = "自定义选择器名"></div>
+<p class= "自定义选择器名"></p>
+
+
+表文件，数据库，数据库服务器
+1、表文件：
+表文件是以   .frm结尾的文件，存在于服务端计算机硬盘上。以数据的形式进行数据储存
+
+2、数据库：
+开发人员将用于存放表文件的文件夹成为数据库
+3、数据库服务器
+用于管理数据库中表文件的软件
+
+数据库分类：
+1、关系型数据库服务器
+管理的表文件彼此之间往往具有隶属关系特征，可以完整描述一段数据，但是在查询时由于
+涉及数据较多，因此查询速度不理想
+2、非关系型数据库
+管理表文件都是独立的。无法描述一段完整的数据。但是由于每次查询的大数据较少。所以
+查询速度非常快
+
+关系型数据库服务器：
+1、甲骨文：Oracle ，MySql
+
+2、微软：SqlServer
+
+
+
+HTTP协议：
+包内部空间由上而下分为4个：
+1、空间划分：
+请求行【
+        url:请求地址
+        method：请求方式
+】
+请求头：【
+        请求参数信息【GET】
+】
+空白行【
+         没有任何内容。只有隔离作用
+】
+请求体【
+          请求参数信息【POST】
+】
+
+包内部结构由上到下为4个：
+状态行【
+        HTTP状态码
+】
+相应头：【
+        content-type：指定浏览器采用队应编译。对响应体二进制数据进行解析
+】
+空白行【
+         没有任何内容。只有隔离作用
+】
+响应体【
+          可能被访问静态资源、文件命令，可能被访问动态资源文件运行结果
+          “都是以二进制形式”
+】
+
+Http服务器常用分类：
+1、JBOSS服务器
+2、Glassfish服务器
+3、Jetty服务器
+4、Websphere服务器
+5、Weblogic服务器
+6、Tomcat服务器
+
+
+
+

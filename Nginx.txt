@@ -1,0 +1,111 @@
+Nginx是一个高性能的Web服务器（只能做静态资源）和反向代理服务器
+特点：内存占用少，并发能力强
+Nginx就相当于是一个转发站，当服务器端的数据访问过来的时候，在将数据转发给后端服务器，等后端传回数据的时候，在返回给前端
+
+
+反向代理：以代理服务器来接收Internet上的连接请求，然后转发给内部网络上的服务器。并将服务器上得到的结果返回给internet上请求连接的客户端
+正向代理：
+
+关闭Nginx:
+kill -QUIT 主pid
+kill -TEMR	 主pid
+kill 主pid
+
+重启服务：
+./nginx -s reload
+
+其他命令：
+当使用配置文件的时候，在后面加上 -t可以i检查配置文件是否出错
+-v(小v)：查看版本号
+-V(大v)：查看版本号和别的东西
+
+
+Nginx配置文件：
+work_processes 1：配置工作进程数，根据自身硬件调整，通常是CPU数量或者2倍CPU
+
+worker_connections xxx；配置worker进程的连接数，上限是65535
+
+配置http服务器
+http{
+xxxx
+}
+include mime.type：查看支持哪些多媒体类型
+
+default type application/octet-stream：默认文件类型是流类型
+
+sendfile on：开启高效文件传输
+
+gzip on：开启gzip压缩输出。产品上线后一般都会打开
+
+
+Nginx主要应用
+1、静态网站部署
+2、负载均衡
+3、静态代理
+4、动静分离
+5、虚拟主机
+
+
+负载均衡方式：
+硬件负载均衡：比如F5，深信服，Array等
+
+软件负载均衡：如nginx，lvs，haproxy
+
+Nginx负载均衡：
+在配置文件中修改
+location /xxx{
+proxy_pass http://xxxa
+}
+在server上面加upstream xxxa{
+	server 192.168.247.128:8081 weight=x         //这里server是必须的，后面是linux系统的ip和服务器的端口号，weight是服务端访问多少次换端口
+}
+
+其中转发策略为轮询、权重、最少连接，轮询更多性能接近的使用，权重就是设置总值中有多少是a使用有多少是b使用
+最少连接：代码：在l=upstream中添加least conn。表示谁连接少连接谁。但是这三种方法会导致丢失session对象
+所以还有一种策略：ip hash。这个不会丢失session对象，但是会导致服务器对象压力过大
+
+其他配置：
+backup：这个配置表示设置为备用服务器，当其他服务器宕机的时候才会启动。常用于更新时（所以更新时优先更新备份服务器）
+down：表示宕机
+
+
+
+静态代理：
+第一种方式：截取后缀是那一堆的文件，去/opt/static目录中取。后缀命可以自定义，目录名也可以自定义
+location ~.*\.(js|css|html|htm|gif|jpg|jpeg|png|bmp|swf|rar|zip|text....等等)${
+root /opt/static
+}
+
+
+第二种：拦截路径
+location ~.*/（css|js|images|img）{
+root /opt/static
+}
+
+
+
+
+虚拟主机：
+基于端口的虚拟主机（了解）：
+基于域名的虚拟主机（主要）
+
+server{
+	listen 80；
+	server name  www.myweb.com
+	location /myweb{
+		proxy_pass http://www.myweb.com
+	}
+}
+
+server{
+	listen 80；
+	server name  www.p2p.com
+	location /myweb{
+		proxy_pass http://www.p2p.com
+	}
+}
+
+虚拟主机需要进去C:\Windows\System32\drivers\etc这里，更改里面的hosts文件添加
+主机ip www.myweb.com
+
+主机ip www.p2p.com

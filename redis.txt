@@ -1,0 +1,251 @@
+基本操作命令:
+ping：返回pong表示正常运行
+dbsize：查看当前库的数量
+select xxx：选择第xxx个库
+flushdb：清除当前库的数据
+exit或者quit：退出，但是redis服务不关闭
+info replication：查看当前关系信息
+
+Key操作命令（-1表示永久存在，-2表示不存在）：
+kes pattern ：查找符合pattern的key
+*：表示0-多个字符，例：keys * 查询所有的key的信息
+？：表示单个字符
+
+exists key (key...)判断一个或者多个key是否存在
+
+expire key：设置一个key在内存中存活的时间，单位是秒
+
+ttl key ：查看一个key的剩余生存时间
+
+type key :查看数据存储是什么类型
+
+del key：删除key；若key不存在就忽略
+
+5种数据类型
+1、字符串类型：String
+2、哈希类型：hash
+3、列表类型：list
+4、集合类型：set
+5、有序集合类型：zset
+
+数据类型命令：
+字符串类型：
+1、set key value：创建一个key和value
+2、get key：获取一个key的值
+3、incr key：把一个key的整数值加1，如果key值不存在，则创造一个key值，从0开始
+4、decr key：把一个key的整数值减1，如果key值不存在，则创造一个key值，从0开始
+5、append key value：如果key存在，则将value值追加在key原来的值后面；若不存在key，则将key设置值为value
+6、strlen key：获取key值的长度，如果没有返回0
+7、getrange key star end： 截取懂star到end的子串，star和end是位置数，从0开始
+8、setrange key offset value：修改从key的值从offset开始的value
+9、mset key value [key value]：设置多个key和value
+10、mget key [key ]：得到多个key的值
+
+哈希类型：
+1、hset key field value：将哈希表key中的域field值的值设置为value，如果key中不存在相同field不存在返回1，field存在覆盖value返回0
+2、hget key field：获取hash类型key中field的值
+3、hmset key field value [field value]：设置多个哈希key中field和value的值
+4、hmget key field [field]：获取哈希key中多个field值
+5、hgetall key：获取哈希key中的所有值（field 和value）
+6、hdel key field [field]：删除哈希key中一个或者多个field，不存在的field直接忽略
+7、hkeys key：获取哈希key中所有的field
+8、hvals key:获取哈希key中所有的field的value值
+9、hexists key field：检测指定key中field值是否存在，如果存在则返回1，不存在返回0
+
+列表类型（一个key 多个value）：
+1、lpush key value [value]：将一个或者多个值从头依次插入（头插法）
+2、rpush key value [value]：将一个或者多个值从尾依次插入（尾插法）
+3、lrange key start stop：截取key中下标从start开始到stop的值
+4、lindex key index：获取key中指定下标index的值，不删除，只查看
+5、llen key：获取key的长度
+6、lrem key count value：删除key中count个value值，count为正数时从左到右删，为负数时，从右到左删，为0时，删除所有和value相同的值
+7、lset key index value：将key中下标index的值换为value
+8、linsert key BFORE | AFTER pivot value：在key中下标为pivot的BFORE(前)或者AFTER（后）插入值value。若pivot没找到返回-1，key不存在返回0
+
+集合类型set（无序）：
+1、sadd key member [member...]：添加一个或者多个成员，返回值是数据条数
+2、smembers key：显示key中所有元素，没有元素显示空
+3、sismember key member：查询key中是否存在member，存在返回1，不存在返回0
+4、scard key：查询key中有多少元素
+5、srem key member [member...]：删除key中一个或者多个成员，返回值是删除的成员个数
+6、srandmember key [card]：随机成key中抽取card个数。当card为正数时，数据随机且唯一，当为负数时，显示数据不唯一
+7、spop key [card]：随机删除key中的card个数
+
+有序集合类型（有序）：
+1、zadd key score member [score member...]：在有序集合key中添加member，并且添加score作为排序标识，score可以是整数或者浮点数。当score值相同
+时，member成员按照字典排序
+2、zrange key start stop [WITHSCORES]：显示key中下标从start到stop的数据，当不加WITHSCORES时默认不显示score
+3、zrevrange key start stop [WITHSCORES]：显示key中下标从stop到start的数据，当不加WITHSCORES时默认不显示score
+4、zrem key member [member...]：删除key中一个或多个成员
+5、zcard key：显示key中成员数量
+6、zrangebyscore key min max [WITHSCORES][LIMIT offset count]（min和max是score值排序）：获取有序集合中score值大于等于min小于等于max的有序
+成员，从小到大排序（可以用inf当作最大值-inf当作最小值，如果不想包括min或者max，那就加上“（”）加上[LIMIT offset count]用于分页
+7、zrevrangebyscore key min max [WITHSCORES][LIMIT offset count]：获取有序集合中score值大于等于min小于等于max的有序成员，从大到小排序
+（可以用inf当作最大值-inf当作最小值，如果不想包括min或者max，那就加上“（”）加上[LIMIT offset count]用于分页
+8、zcount key min max：显示在score值中大于等于min或者小于等于max的成员数量
+
+
+事务：
+multi：开启事务
+当开启事务后不会立马提交，而是暂存在缓存中，当exec提交事务后，数据才会被提交，其中当语法或者句子发生错误时，redis放弃事务的执行
+exec：提交事务
+当语句正常，但执行时发生异常时，执行错误的语句前会被提交
+discard：放弃事务
+watch key [key...]：监视一个或多个key是否发生改变，当发生改变时，退出事务
+unwatch：放弃监视（监视只存在于事务之中）
+
+
+持久化：
+RDB方式：指定的时间间隔内将内存中的数据集快照写入磁盘，数据恢复时将快照文件在读到内存中，在写入磁盘的时候，redis会用新的线程去完成。存储的文件
+默认是dump.rdb
+存储的开启和关闭的一系列操作都在redis.conf配置文件中，
+（1）、配置格式是：save <seconds> <changes>。seconds表示间隔时间，changes表示M个key改变的次数。在seconds发生了changes个key改变时保存
+（2）、dbfilename：设置RDB的文件名，默认是dump.rdb
+（3）、dir：指定RDB文件的存储位置，默认是./，也就是当前路径，可以i使用绝对和相对路径
+
+AOF方式：每次执行改变数据的时候，将修改数据的命令写入一个AOF文件中，在redis重启的时候，执行AOF文件中的命令来恢复数据
+实现方式：修改redis.conf配置文件
+（1）、appendonly：默认是on，改为yes就能开启aof持久化
+（2）、appendfilename：指定AOF文件名，默认appendonly.aof
+（3）、dir：同RDB
+（4）、appendfsync：配置向aof文件中写命令数据的策略：
+no：每隔30秒写入一次（快速）。always：每次执行都写入（安全）。everysec：每秒执行一次写入。
+（5）、auto-aof-rewrite-min-size：运行重写的最小aof文件大小，默认是64M，当大于64M时，开始整理aof文件，去除无用的操作命令
+
+
+主从复制：
+一主多从，当主服务器故障时，从服务器能够临时代替主服务器。方法1：改写配置文件：
+主redis（设置端口号6380（端口号可以在1025-63300之间随便起）。daeminize yes等于是默认后台运行，logfile 6380.log：日志。
+dbfilename dump6380.rdb：rdb文件名）：
+
+当存在主从时，打开服务的命令变为：./redis.cli -p xxxx（xxxx为端口号）
+
+include /usr/local/redis.6.2.6/redis.conf
+daeminize yes
+port 6380
+pidfile /var/run/redis_6380.pid
+logfile 6380.log
+dbfilename dump6380.rdb
+
+从服务器（端口号6382【可随便改】。slaveof 127.0.0.1 6380.后面的数据表示主服务器的端口）：
+include /usr/local/redis.6.2.6/redis.conf
+daeminize yes
+port 6382
+pidfile /var/run/redis_6382.pid
+logfile 6382.log
+dbfilename dump6382.rdb
+slaveof 127.0.0.1 6380
+
+故障处理：冷处理：机器挂掉了再处理
+当主服务器挂掉之后，人为的将从服务器中某一个输入"slaveof no one"，这样就可以将该从服务器升级为主服务器。
+但是此时别的服务器并不知道现在你是主服务器，所以也需要人为的更改从服务器的服务对象，"slaveof 127.0.0.1 xxxx"（其中xxxx为主服务器的端口号）
+
+
+高可用的哨兵方案：
+作用：
+1）、监控：Sentinel哨兵会不断的检查主服务和从服务是否按照预期去正常工作
+2）、提醒：当redis出现问题时，提醒管理人员或者其他程序
+3）、自动故障转移：监控的主服务器不能工作时，Sentine会开始故障迁移的操作，也就是上述的故障处理
+哨兵一定是单数个的，并且是3个起步，也就是3，5，7，9......
+哨兵的默认端口是26379，但是可以人为的改变。哨兵之间是独自监控的，哨兵之间只存在消息互换。使用心跳机制来判断redis是否宕机。多个哨兵使用投票机制
+判断主redis是否宕机，投票机制是少数服从多数
+再redis的文件中已经存在了哨兵的文件，文件名是redis-sentinel。一个哨兵一个配置文件。每个哨兵需要在不同的计算机中
+哨兵的配置文件是sentinel.conf，需要修改的配置为：
+port xxxxx：xxxxx是端口号
+sentinel monitor mymaster 127.0.0.1 xxxx m ：mymaster 是自定义名字，可以随便改。127.0.0.1是主redis的ip地址。xxxx是主redis的端口号，M是投票数量
+投票数为M时，改变主服务器
+
+
+
+安全设置：因为redis默认是没有密码的，所以为了安全考虑，需要设置密码，开启密码在redis.conf中查找requirepass 
+requirepass xxxxx：xxxx是密码
+设置完密码后，命令的方式进入./redis-cli -a xxx。xxx是密码。也可以先进入./redis-cli，然后通过auth xxx(xxx是密码）登录redis
+当端口号改变时，还需要在./redis-cli -p xxx，xxx是端口号
+
+
+Jedis操作redis：
+
+        //创建jedis对象，指定连接redis服务器的ip，端口
+        /**
+         * String host:redis所在的linux服务器的ip,
+         * int port:redis服务的端口号
+         *
+         *jedis是通过网络去使用redis，所以必须保证linux系统防火墙关闭以及redis使用了配置文件
+         */
+        String host = "192.168.247.128";
+        int port = 6379;
+        Jedis jedis = new Jedis(host,port);
+        //输入登录密码
+        jedis.auth("123456");
+        //调用jedis对象的方法，操作Redis数据
+
+因为使用jedis可能存在线程安全问题，所以一般配套commons-pool线程池使用
+先写一个Redis的工具类
+
+public class RedisUtils {
+    private static JedisPool pool;
+
+    //创建jedispll对象
+    public static JedisPool open(String ip,int port){
+        if(pool == null){
+            //创建JedisPool
+            //创建JedisPoolConfig，给config设置连接池的参数，使用config对象创建JedisPool
+            JedisPoolConfig config = new JedisPoolConfig();
+
+            //设置最大的线程数，一个线程就是一个Jedis
+            config.setMaxTotal(20);
+
+            //设置最大空闲数
+            config.setMaxIdle(2);
+
+            //检查项为真，表示从线程池中获取的对象一定是可用的
+            config.setTestOnBorrow(true);
+
+            //创建pool对象
+            /**
+             * config:配置器
+             * ip：redis所在的linux地址
+             * port：端口号
+             * 6000：人为设置的超时检查，毫秒值
+             * “123456”：密码
+             */
+            pool = new JedisPool(config,ip,port,6000,"123456");
+        }
+        return pool;
+    }
+    //关闭对象
+
+    public static void close(){
+        if(pool != null){
+            pool.close();
+        }
+    }
+}
+
+使用：
+    @Test
+    public void text()
+    {
+        String host = "192.168.247.128";
+        int port = 6379;
+
+        JedisPool pool = null;
+        Jedis jedis = null;
+
+        try {
+            pool = RedisUtils.open(host,port);
+            //从pool中获取jedis对戏
+            jedis = pool.getResource();
+
+            List<String> age = jedis.zrange("age", 0, -1);
+            for(String a :age){
+                System.out.println(a);
+            }
+        }finally {
+
+            //关闭Jedis对象
+            if(jedis != null){
+                jedis.close();
+            }
+        }
+    }
