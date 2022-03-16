@@ -1,0 +1,527 @@
+数据库SQL语句分类：
+DQL（数据查询语言）：查询语句。凡是select语句都是DQL
+DML（数据操作语言）：insert delete update，对”表“中的数据进行增删改。
+DDL（数据定义语言）：creatr drop alter ，对”表结构“的增删改。
+TCL（事务控制语言）：commit 提交事务。rollback回滚事务。
+DCL（数据控制语言）：grant授权 、 revoke撤销权限
+
+
+Mysql的语句：
+select database();
+查看使用的是哪个数据库
+select version（）；
+查看mysql的版本号 
+show databases;
+观看表
+creata database xxxx;
+创建一个叫xxx的表
+use xxx；
+转换表使用xxx；
+show tables；
+查看表
+desc 表中子表名；
+查看子表的结构
+
+\c 结束一条语句
+
+show create table emp;
+查看创建表的语句
+
+
+
+DQL（数据查询语言）：
+select 字段名1，字段名2，字段名3，。。。 from 表名；
+ 想要改某个字段的名字就字段名后面加as xxx。如果想用中文，需要用’‘单引号括起来
+
+查询所有字段：
+select * from xxx;(xxx为表名)
+这个方法能够查询表内的所有东西，但是java语言中不支持。效率很低
+
+
+条件查询：
+语法格式
+select 
+      字段，字段，...
+from 
+       表名
+where
+       条件；
+执行时先执行from，然后where，最后select （大小写通用）
+
+sql中<>就是！=
+between 1000 and 3000 是闭区间[1000,3000]
+
+对于为null的属性，需要使用 is null来判断或者查询，不能使用  = null 
+
+
+模糊查询like （需要熟练使用%和_两个符号）；
+（%表示全部。_表示一个）
+寻找xxx子表中某数据组中所有带有o字符的参数
+ select xxx from 表名 where 某子表中某数据组 like '%o%'
+   //第二个字母是A
+ select xxx from 表名 where 某子表中某数据组 like '_A%'
+
+排序（升序、降序）asc 表示升序     desc表示降序
+当没有具体设定升降序的时候，默认为升序
+默认升序排列
+select xxx 
+from 表名 
+order by 排序的东西 （asc）；
+ 降序排列
+select xxx 
+from 表名 
+order by 排序的东西 （desc）；
+
+这里的order by 排序的东西 desc , 排序的东西 asc
+其中， 后面的需要再前一个排序的东西相等时。再执行后面的语句
+select xxx 
+from 表名 
+order by 排序的东西 desc , 排序的东西 asc；
+
+排序时，前面的字段更能起到主导作用，只有在前面的字段无法完成排序的时候，才会启动
+后面的排序
+
+分组函数：
+count    取得记录数
+sum    求和
+avg    取平均
+max    取最大
+min    取最小
+分组函数都是以一组为单位的
+
+分组函数还有一个名字叫：多行处理函数
+多行处理函数的特点：输入多行，得到一行
+分组函数自动忽略null
+
+所有有null参与的运算符运算结果都为null
+
+ifnull()语句
+ifnull（可能为null的数据，被当作什么处理）
+
+分组函数不能用于where语句中
+count(*)和count（某个字段）的区别在于
+count（*）不是统计某个字段中二档数据个数。而是统计总记录的条数
+count（某个字段）表示统计某个字段中不为null的数据总数量
+
+
+group by :按照某个字段或者某些字段进行分组。
+having : having是对分组中之后的数据进行再次过滤
+
+
+//对emp表中的工作字段找最高薪资
+select max(sal) from emp group by jop ; 
+
+select ename.sal from emp where sal > (select avg(sal) from emp group by jop);
+
+当一条查询语句查询时，只要出现了group by X字段  语句，那么select后只能跟X分组函数
+和参与分组的字段
+
+having 用法
+在where无法过滤之后使用，，因为效率太低
+找出每个部门的平均薪资，显示大于2000的
+select depton,avg(sal) from emp group by depton having avg(sal)>2000;
+
+
+union （可以将查询结果相加）
+语法：
+limit stratIndex, length //stratLindex是起始位置。length是长度
+
+limit (分页查询主要手段，并且只能在mysql中使用) 是最后执行的环节
+比如：取平均工资最大的前5个：
+select ename,sal from emp order by sal desc limit 0 , 5;
+
+
+创建表！
+语法格式：
+create table 表明（
+字段名1 数据类型，
+字段名2 数据类型，
+字段名3 数据类型，
+.。。。
+）；
+
+MySql常用数据类型：
+int                     整数型
+bigint                 长整型
+float                   浮点型
+char                   定长字符串
+varchar               可变长字符串
+date                   日期类型
+BLOB                 二进制大对象（存储图片、视频等）
+CLOB                 字符大对象（储存大文本，比如4G的字符串）
+
+char和varchar的区别在于vachar属于智能识别，在范围内分配空间随目标大小变动
+char的值如果设定在4，那么无论存入char多大，只要不超过4，都分配4个空间
+
+create table t_student(
+no  int,     //学号
+name vachar(255),   //姓名
+sex char(1),           //性别 1表示男，0表示女
+classno char(10)         //班级名
+);
+insert语句（插入语句）：
+语法格式：
+insert into 表名（字段名1，字段名2，字段名3.。。。） values(值1，值2，值3);
+
+比如：给上面t_student表中插入数据
+insert into t_student (no,name,char,classno) values(123,'zhangsan','1','高一二班');
+插入数据也能一次插入多个数据
+insert into t_student (no,name,char,classno) values(xxx)，(xxx)，(xxx);
+insert语句还能够省略student（）括号内的东西，但是这样value里的格式必须和表的格式
+保持一致，不能多也不能少
+
+删除表：
+drop table if exists t_student   //如果t_student表存在，删除
+
+default ：给属性赋予默认值
+create table t_student(
+no  int,     //学号
+name vachar(255),   //姓名
+sex char(1) default 1,           //性别 1表示男，0表示女，默认值是1
+classno char(10)         //班级名
+);
+
+
+表的复制：
+//创建一个新的表，将select语句执行的结果赋值在新表内
+create table 表明 as select语句；
+综上所诉，也可以将查询结果插入到一张表中（但是表结构不同不能插入）
+insert into 表名 select * from dept；
+
+修改数据：update 
+update 表名 set 字段名1=值1，set 字段名2=值2 ....  where 条件；
+如果没有where语句。表示整张表全部更新
+
+删除数据：delete
+语法格式：
+delete from 表名 where 条件；
+如果没有where，整张表删除
+
+如何删除大表：
+truncate table emp1;
+因为删除语句只是删除数据，并没有释放空间，但是truncate语句是直接释放空间（类似）
+
+对表的结构进行修改，几乎使用工具直接修改，
+使用语句的话是：
+alter table 表名 add（字段名1 数据类型，字段名2 数据类型....）
+
+约束（Constraint）：增加约束的目的是为了保证表中数据的合法性、有效性、完整性
+非空约束（not null）：不能为空。只有列级约束
+唯一性约束(unique)：不能重复   。不仅能进行列级约束，还能进行表级约束
+主键约束(primary key)(PK)：不能为空也不能重复。一张表的主键约束只能有一个
+外键约束(foregin key)(FK)：
+约束一般都在创建表数据之后，比如
+drop table if exists t_user;
+create table t_user(
+id int unique;    //表示id不能重复
+username varchar(255) not null;     //表示username不能为空
+password varchar(255) not null;      //同理，列级约束
+);
+
+如果想要给多个字段联合增加约束：
+
+drop table if exists t_user;
+create table t_user(
+id int unique;    //表示id不能重复
+username varchar(255) ;    
+password varchar(255) ;
+unique（username，password）；  //表级约束     
+);
+
+主键约束：主键约束一般都是成为标识
+主键的分类：
+由数量：
+单一主键（建议使用）
+复合主键（不建议使用）
+由性质：
+自然主键（主键最好是一个和业务无关的自然数）
+业务主键（见明知意，由业务设置主键。不推荐使用。一但业务发生改变，主键可能改变）
+表级约束的写法：primary key（字段名）；
+主键值的自增;
+auto_increment
+
+
+use Text;
+drop table if exists t_user;
+create table t_user(
+id int primary key auto_increment,
+username varchar(255)
+);
+insert into t_user (username) value('a');
+insert into t_user (username) value('b');
+insert into t_user (username) value('c');
+insert into t_user (username) value('d');
+select * from t_user;
+以上代码得到的结果是在id队应值上由1开始，往下自增1
++----+----------+
+| id | username   |
++----+----------+
+|  1 | a                |
+|  2 | b                |
+|  3 | c                |
+|  4 | d                |
++----+----------+
+
+
+
+外键约束：主要用于多张表联动的时候。外键不像主键，外键可以用null
+外键使用的父类必须有唯一性
+比如有A，B两张表，A中有一个数据叫name。B中需要使用A中的name。又因为AB是联动
+的。所以B表中的name不能随意添加，这个时候就需要使用外键约束。
+
+顺序要求：
+删除数据的时候，必须先删除子表中的，才能删除父表中的
+添加数据的时候，必须先添加父表中的，才能添加子表中的
+表的增删一样
+(前提条件！使用外键约束的时候)
+
+
+外键约束的语法格式
+foreign key(子类xxx) references 父表名（xxx）
+
+例子：
+drop table if exists t_class;     //重要的东西1
+drop table if exists t_user;      //重要的东西1  （删除顺序）
+
+create table t_user(
+uno int ,
+uage int ,
+primary key(uno)
+);
+
+create table t_class(
+cno int primary key,
+cname varchar(255),
+userno int,
+foreign key (userno) references t_user(uno)
+);
+
+//重要的东西2 （创建顺序）
+insert into t_user values(100,18);
+insert into t_user values(101,19);
+insert into t_user values(102,20);
+
+insert into t_class values(1,'zhangsan',100);
+insert into t_class values(2,'lisi',101);
+insert into t_class values(3,'wanger',102);
+
+
+select * from t_user;
+select * from t_class;
+
+
+
+存储引擎（表的存储方式）（这种说法只在mysql中存在）
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Table  | Create Table                                                                                                                                                      |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| t_user | CREATE TABLE `t_user` (
+  `uno` int NOT NULL,
+  `uage` int DEFAULT NULL,
+  PRIMARY KEY (`uno`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci |
++--------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (0.00 sec)
+
+“ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci”
+这就是存储方式，不同的数据库存储方式也不一样
+
+
+show engines \G查看当前版本支持的存储引擎（MySql是9种）（了解就行）
+*************************** 1. row ***************************
+      Engine: MEMORY
+     Support: YES
+     Comment: Hash based, stored in memory, useful for temporary tables
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 2. row ***************************
+      Engine: MRG_MYISAM
+     Support: YES
+     Comment: Collection of identical MyISAM tables
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 3. row ***************************
+      Engine: CSV
+     Support: YES
+     Comment: CSV storage engine
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 4. row ***************************
+      Engine: FEDERATED
+     Support: NO
+     Comment: Federated MySQL storage engine
+Transactions: NULL
+          XA: NULL
+  Savepoints: NULL
+*************************** 5. row ***************************
+      Engine: PERFORMANCE_SCHEMA
+     Support: YES
+     Comment: Performance Schema
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 6. row ***************************
+      Engine: MyISAM
+     Support: YES
+     Comment: MyISAM storage engine
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 7. row ***************************
+      Engine: InnoDB
+     Support: DEFAULT
+     Comment: Supports transactions, row-level locking, and foreign keys
+Transactions: YES
+          XA: YES
+  Savepoints: YES
+*************************** 8. row ***************************
+      Engine: BLACKHOLE
+     Support: YES
+     Comment: /dev/null storage engine (anything you write to it disappears)
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+*************************** 9. row ***************************
+      Engine: ARCHIVE
+     Support: YES
+     Comment: Archive storage engine
+Transactions: NO
+          XA: NO
+  Savepoints: NO
+9 rows in set (0.00 sec)
+
+常用引擎：
+1、MyISAM（不是默认引擎）
+ xxx.frm(存储格式的文件)
+xxx.MYD(存储表中数据的文件)
+xxx.MYI(存储表中索引的文件)
+优点是可被压缩，节省空间，且可转为只读表，提高检索效率
+缺点是不支持事务
+2、InnoDB（默认引擎）
+优点：支持事务，行级锁、外键等。这种储存引擎数据十分安全
+表结构存储在xxx.frm文件种
+数据存在tableespace这样的表空间（逻辑），无法被压缩，无法转换为只读文件
+这种存储引擎在MySQL数据库崩溃后提供自动恢复机制
+支持级联删除和连级联更新
+3、MEMORY
+缺点：不支持事务，数据容易丢失。因为所有数据和索引都在内存中，没保存关机就没了。
+优点：查询速度最快
+
+事务(Transaction)：
+一个事务是一个完整的业务逻辑单元，不可再分。
+比如银行转账1w元
+update t_act set balance = balance - 10000 where actno = 'act-1';
+update t_act set balance = balance + 10000 where actno = 'act-2';
+其实两条语句只能同时成功或者失败，不能一边成功一边失败，为了满足这个条件，所以需
+要事务机制
+和事务有关的语句只有：DML语句（insert delete update）
+事务的存在是为了保证数据的完整性和安全性
+
+事务的原理
+
+1、开始事务机制（开始）
+2、假设执行insert语句。当insert语句执行成功后，是将执行的记录记录在数据库的历史中。
+并没有进行增加应硬盘上的内容
+同样的，update和delete也是一样，只是将操作记录在缓存中。
+3、提交事务或者回滚事务（结束）
+结束事务之后缓存清空
+提交事务：直接更改文件，然后清空缓存
+回滚事务：清空缓存不改文件
+
+commit 提交事务
+rollback 回滚事务
+saveprint 保存点
+
+事务的特性（ACID）
+A：原子性：事务是最小的工作单位，不可再分
+C：一致性：事务必须保证多条DML语句同时成功或者失败
+I：隔离性：事务A和事务B具有距离（安全性）
+D：持久性：持久性是最终数据必须持久化到硬盘文件中，这个事务才算成功
+
+事务之间的隔离性：
+第一级别：读未提交（read uncommitted）（A事务还没提交。B就能读取到A的数据）
+问题：出现脏读（Dirty Read）现象：读到了脏的数据
+第二级别：读已提交（read committed）（A提交了，B能读取）
+读取已经提交的问题是：不可重复读。解决了脏读问题
+第三级别：可重复读（repeatable）。解决了不可重复读的问题
+第四级别：序列化读/串行化读
+解决了所有问题。效率低。需要事务排队
+
+MySQL默认第三级别
+start transaction    //关闭默认的commit
+
+
+索引：
+索引就是目录，寻找数据的时候可以快速找到数据
+检索有两种方式：
+第一种：全表扫描
+第二种：根据索引检索
+
+虽然索引能够提高检索效率，但是对于经常修改的数据，不推荐索引。因为每一次修改数据
+都需要新的索引并且索引需要重新排序。成本问题。
+
+什么时候需要添加索引：
+1、数据量庞大    （根据客户的需求）
+2、该字段很少的DML操作     （因为字段进行修改，索引也会维护）
+3、经常出现在where子句中        （经常根据哪个字段查询）
+
+|||主键和具有unique约束的字段会自动添加索引。所以主键查询的效率高，推荐使用
+
+查看扫描计划使用explain + select语句
+
+如何创建/删除索引：
+创建：
+create index 索引名 on 被索引目标；
+删除：
+drop index 索引名 on 被索引对象
+
+模糊查询的第一个%会让索引失效
+
+
+视图：
+站在不同角度看到的数据
+创建视图：
+create view myview as select empno,ename from emp;
+删除视图:
+drop view myview;
+
+对视图进行增删改查会影响到原表
+
+将数据库当中的数据导出：
+在windows的dos命令窗口执行：
+mysqldump xxxxx>D:\xxxxx.sql -uroot -p123（导出整个库）
+
+mysqldump xxxxx（数据库名） aaa(表名)>D:\xxxxx.sql -uroot -p123（导出整个库）
+导入数据
+create database xxxx(数据库名)；
+use xxxx；
+source D:\xxxx.sql
+
+三范式
+第一范式
+任何一张表都应该只有一个主键，并且每一个字段原子性不可再分
+
+第二范式
+建立在第一范式的基础上，所有非主键字段完全依赖主键，不能产生部分依赖
+多对多？三张表。关系表两个外键
+
+第三范式
+建立在第二范式的基础之上，所有非主键字段直接依赖主键字段，不能产生传递依赖
+
+
+
+select depton,avg(sal) as avgsal from emp group  by depton;
+
+
+
+
+
+
+
+
+
+
+

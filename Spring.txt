@@ -1,0 +1,418 @@
+
+//在resources文件下创建一个spring config的配置文件，里面增加这个标签的意思是创建对象
+//对象名（ID）叫someService，路径（class）是org.example.service.impl.SomeServiceImpl
+<bean id="someService" class="org.example.service.impl.SomeServiceImpl"/>
+
+
+//测试类
+@Test
+public void text(){
+        //指定spring的配置名称
+        String config = "beans.xml";
+        //创建表示Spring容器的对象ApplicationContext
+        //通过ApplicationContext容器获得对象
+        //ClassPathXmlApplicationContext（）：表示从类路径中加载文件
+        //路径是在target下的classes中找，所以最后需要在classes中添加breans.xml配置文件
+        //在执行下面语句的时候，SomeServiceImpl对象就被创建
+        //更重要的是在beans配置文件中创建了几个标签，几个标签就是几个对象（会创建配置文件中所有对象）
+        ApplicationContext ac = new ClassPathXmlApplicationContext(config);
+        //使用getBean方法获取在beans.xml配置文件中beans的ID值
+        //强转对象
+        SomeService service = (SomeService) ac.getBean("someService");
+        service.dosome();
+    }
+
+@Test
+    public void text2(){
+        String config = "beans.xml";
+        ApplicationContext ac = new ClassPathXmlApplicationContext(config);
+        //调用getBeanDefinitionCount()方法能够获得Beans配置文件中对象的数量
+        //调用getBeanDefinitionNames()方法能够获得Beans配置文件中对象的名字
+        Integer num = ac.getBeanDefinitionCount();
+        String[] names = ac.getBeanDefinitionNames();
+        System.out.println(num);
+        for (String name:names){
+            System.out.println(name);
+        }
+    }
+
+
+
+设值注入：
+//创建一个对象myStudent，路径是"org.example.ba01.Student">
+//给其中一个name叫name的东西，value赋值叫“张三”
+<bean id="myStudent" class="org.example.ba01.Student">
+        <property name="name" value="张三"/>
+        <property name="id" value="1231212"/>
+    </bean>
+
+//在类中有一个类的引用对象时
+<bean id="myStudent" class="org.example.ba01.Student">
+        <property name="name" value="张三"/>
+        <property name="id" value="1231212"/>
+        <property name="school" ref="mySchool"/>
+    </bean>
+    <bean name="mySchool" class="org.example.ba01.School">
+        <property name="name" value="北京大学"/>
+        <property name="address" value="北京海淀区"/>
+    </bean>
+
+
+构造注入：
+构造注入使用  <constructor-arg >标签 
+        <constructor-arg name="id" value="123123123"/>
+        <constructor-arg name="name" value="张三"/>
+        <constructor-arg name="school" ref="mySchool"/>
+标签中的name还能够换成index = "xxx",其中xxx表示为构造方法中参数的位置。从0开始往右边数
+
+包含关系的配置文件中
+主要使用标签是<import resource = "classpath:xxxx">
+
+学习的注解：
+1、@Component
+2、@Respotory
+3、@Service
+4、@Controller
+5、@Value
+6、@Autowierd
+7、@Resource
+
+component-scan:声明组件扫描器
+<context:component-scan base-package="注解的包名">
+
+
+
+1、@Component这个注解是使用在类的头上，其中属性为value。表示给下面的类赋值
+2、@Respotory     用在持久层的上面：放在dao的实现类上面
+                                                     创造dao对象，dao对象是能访问数据库的
+3、@Service    用在业务层上的。放在service的实现类上面。
+                                                   创建service对像，service对象是做业务处理，可以有事务功能
+4、@Controller   用在控制器上面。放在控制器（处理器）类上的，创建控制器对象的，控制器对
+                                                    象，能够接收用户提交的参数，显示请求结果
+以上注解用法和@Component一样，但是这三个注解还有别的功能
+
+
+指定包的三种方式：
+1、多次使用
+<context:component-scan base-package="注解的包名">
+2、使用分隔符（；或者，）分隔多个包
+3、指定父类（由于父类的包过于庞大，所以使用父类的效率会降低）
+
+@Value 这个注解用在具体的属性上面。或者具体属性的set方法上，给其赋值
+
+@Autowierd：在应用类型上写注解
+spring方法提供的注解，实现引用类型的赋值
+spring中通过注解给引用类型赋值。使用的是自动注入原理，支持byName,byType
+默认使用的byType
+如果想使用byName，需要再加上一个注解Qualifier(value="xxx")
+如果在使用byName方式时报错有required=true，代表名不存在
+required在Autowierd赋值。推荐为true，这样报错时会直接报错，如果用false的话，能运行，但是无法赋值
+
+@Resource  功能和Autowierd一样，但是这是对jdk注解的，也支持byName,byType
+默认byName   .如果是用 byName失败，它会自动再使用byType
+如果只想用byName方式，那就@Resource（name = ""）
+
+关于使用xml方式和注解方式的对比：如果经常改的话就xml，不经常改的话就使用注解
+${“xxx”}   注解方式
+
+
+
+
+
+
+
+
+
+
+
+
+aspectj框架的使用（aop面对切面的编程）
+1、切面的执行时间。这个执行时间在规范中叫Advice（通知，增强）
+在aspectj框架中使用注表示的。但也可以是用xml配置中的标签
+1、@Before     前置通知注解
+2、@AfterReturning     后置通知注解
+3、@Around        环绕通知注解
+4、@AfterThrowing     异常通知注解
+5、@After     最终通知
+
+切入点表达式：
+execution(modifiers-pattern? ret-type-pattern 
+declaring-type-pattern?name-pattern(param-pattern)
+ throws-pattern?)
+
+modifiers-pattern] 访问权限类型
+ret-type-pattern 返回值类型
+declaring-type-pattern 包名类名
+name-pattern(param-pattern) 方法名(参数类型和参数个数)
+throws-pattern 抛出异常类型
+
+execution(访问权限 方法返回值 方法声明(参数) 异常类型)
+
+aspectj:
+
+1、@Before     前置通知注解
+public void text01(){
+        String config = "applicationContext.xml";
+        ApplicationContext ac = new ClassPathXmlApplicationContext(config);
+        //通过容器获得目标对象
+        SomeService proxy =(SomeService) ac.getBean("someService");
+        //通过代理的对象执行方法，实现目标方法时，增强了功能
+        proxy.dosome("lisi",20);
+    }
+
+public class SomeServiceImpl implements SomeService {
+    @Override
+    //目标对象
+    public void dosome(String name, int age) {
+        //给dosome方法增加一个方法，在执行之前输出一个时间
+        System.out.println("=====目标方法执行========");
+    }
+
+public interface SomeService {
+    void dosome(String name,int age);
+}
+
+
+/*
+*@Aspect表示这是用来给业务增加功能的类，在这个类中有切面的功能代码
+*
+* */
+@Aspect
+public class MyAcspect {
+    /*
+    * 定义方法，方法是实现切面的功能
+    * 要求：
+    * 公共方法public
+    * 方法没有返回值
+    * 方法名称自定义
+    * 方法可以有参数，也可以没参数
+    * */
+
+    /*
+    * @Before:前置通知注解
+    *属性：value，是切入点表达式，表示切面的功能执行位置
+    * 这个注解放在方法的上面
+    *特点：
+    * 1、在方法之前执行
+    * 2、不会影响方法执行的结果、
+    * 3、不会影响方法的执行
+    * */
+    @Before(value = "execution(public void org.example.ba01.SomeServiceImpl.dosome(String,int))")
+    public void myBefore(){
+        //切面执行的代码
+        System.out.println("前置通知 ,切面功能实行"+new Date());
+    }
+    <!-声明目标对象类-->
+    <bean id="someService" class="org.example.ba01.SomeServiceImpl"/>
+    <!--声明切面类对象-->
+    <bean id="myAcspent" class="org.example.ba01.MyAcspect"/>
+    <!--声明自动代理生成器，使用aspectj框架内的功能，创建目标对象的代理对象
+    aspectj-autoproxy会把spring容器中所有的目标对象，一次性都生成代理对象
+    -->
+    <aop:aspectj-autoproxy />
+
+
+    * @JoinPoint:要加入切面功能的业务方法
+    * 作用是：可以获得通知方法执行时的信息
+    * 如果你的切面功能中需要用到方法的信息。就加入JoinPoint
+    * 这个JoinPoint参数值是框架赋予的，必须是第一个位置的参数
+@Before(value = "execution(public void org.example.ba01.SomeServiceImpl.dosome(String,int))")
+    public void myBefore(JoinPoint jp){
+        //获取方法的签名
+        System.out.println("方法的签名（定义）"+jp.getSignature());
+        System.out.println("方法的名称"+jp.getSignature().getName());
+        //获取方法的实参
+        Object args[] = jp.getArgs();
+        for(Object arg:args){
+            System.out.println("参数=" +arg);
+        }
+        //切面执行的代码
+        System.out.println("前置通知 ,切面功能实行"+new Date());
+    }
+
+方法的签名（定义）void org.example.ba01.SomeService.dosome(String,int)
+方法的名称dosome
+参数=lisi
+参数=20
+前置通知 ,切面功能实行Fri Apr 16 22:05:42 CST 2021
+
+
+2、@AfterReturning     后置通知注解
+/*
+    * @AfterReturning     后置通知注解
+    *属性：1、value 切入点表达式
+    * 2、returning 自定义变量，表示目标方法的返回值。
+    * 自定义变量的名字必须和通知方法的形参名一样
+    * 位置：方法上面
+    * 特点：
+    * 1、在方法之后执行
+    * 2、能够得到目标方法的返回值。可以根据返回值做不同的处理
+    * 3、能够修改返回值
+    * */
+    @AfterReturning(value = "execution(* *..SomeServiceImpl.doOther(..))",
+    returning = "res")//最后returning的值要和方法参数名一样就行
+    public void myAfterReturing(Object res){
+        System.out.println("这是后置通知，在目标方法之后。获得返回值："+res);
+    }
+
+3、@Around        环绕通知注解
+/*
+    * @Around        环绕通知注解
+    * 格式：
+    * 1、public
+    * 2、必须要有返回值，推荐使用Object
+    * 3、方法名称自定义
+    * 4、方法有参数，固定的参数ProceedingJoinPoint
+    *
+    * @Around
+    * 属性：value  切入点表达式
+    * 位置：方法之上
+    *特点
+    * 1、它是功能最强的通知
+    * 2、在功能的前后都能增强功能
+    * 3、控制目标方法是否被执行
+    * 4、修改目标原来的返回值结果，影响返回结果
+    *
+    * 环绕通知等同于JDK中的动态代理，InvocationHandler接口
+    * ProceedingJoinPoint就等于是动态代理中的method
+    * */
+ @Around(value = "execution(* *..SomeServiceImpl.doFirst(..))")
+    public Object myAround(ProceedingJoinPoint pjp) throws Throwable {
+        String name = "";
+        Object objs[] = pjp.getArgs();
+        if(objs != null && objs.length > 0){
+            Object obj = objs[0];
+            name =(String) obj;
+        }
+
+        Object result= null;
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        System.out.println("环绕通知，在目标方法之前显示时间："+sdf.format(date));
+
+        if("qiuyue".equals(name)) {
+            result = pjp.proceed();
+        }
+
+        System.out.println("环绕通知，在目标方法之后执行事务");
+        if(result != null){
+            return result= "呸！屌人";
+        }
+        return result;
+    }
+
+
+
+@Pointcut：定义和管理切入点，如果项目中有多个重复的切入点表达式是重复的，可以复用
+属性：value:切入点表达式
+位置：自定义方法上
+
+@Pointcut(value = "execution(* *..SomeServiceImpl.doFirst(..))")
+public void mypt(){
+   //不需要代码
+ }
+此时这里定义的mypt()就等于是execution(* *..SomeServiceImpl.doFirst(..))
+可以统一管理value
+
+
+
+处理事务：
+spring处理事务管理器模型。使用步骤都是固定的，把事务使用的信息提供给spring就行了
+1、事务内部提交、回滚事务、使用众多事务管理器对象，替你完成commit,rollback
+接口：PlatformTransactionManager，定义了事务的重要方法。commit和rollback
+实现类：spring把每一种数据库访问技术对应的事务处理类都创建好了
+如何使用：需要告诉spring你用的是什么技术
+如何告诉spring：
+声明数据库访问技术对应的事务管理器实现类，在bean中声明就可以了
+<bean id="xxx" class="....DataSourceTransactiobManger">
+
+你的业务需要什么样得事务，说明需要的事务类型
+
+隔离级别都是以ISOLATION_开头
+mysql默认是可重复读，
+
+事务的超时时间，表示一个方法最长的执行时间，如果方法执行时间超过了规定，那么事务回滚
+
+事务的传播行为：控制业务方法是不是有事务的，是什么样的事务
+总共有7个，表示你的业务方法调用时，事务在方法之间是如何来使用的
+
+PROPAGATION_REQUIRED				
+PROPAGATION_REQUIRES_NEW
+PROPAGATION_SUPPORTS
+以上3个最为重要
+
+PROPAGATION_MANDATORY 
+PROPAGATION_NESTED
+PROPAGATION_NEVER
+PROPAGATION_NOT_SUPPORTED
+
+
+PROPAGATION_REQUIRED：指定的方法必须在事务内执行。若当前存在事务，就加入到当前事务
+中；若当前没有事务，则创建一个新事务。
+ROPAGATION_SUPPORTS：指定的方法支持当前事务，但若当前没有事务，也可以以非事务方式
+执行。（比如select）
+PROPAGATION_REQUIRES_NEW：总是新建一个事务，若当前存在事务，就将当前事务挂起，直
+到新事务执行完毕。
+
+spring框架中提供的事务处理方案
+1、适合中小项目使用的，注解方案
+spring框架自己用aop实现给业务方法增加事务的功能，使用@Transactional注解增加事务
+给你给注解的属性赋值，表示具体的隔离等级，传播行为，异常信息等
+
+使用@Transactional的步骤
+1、需要声明事务管理器的对象
+<bean id="xx" class="DataSourceTransactionManager">
+2、开启事务注解驱动，这里是告诉spring框架，我要用注解的方式去管理事务。spring使用aop机制
+，创建@Transactional所在的类代理对象，给方法加入事务的功能
+spring给业务方法加入事务：
+在你的业务方法执行之前，开启事务，在业务方法之后提交或者回滚事务，使用aop环绕通知
+@Around（”你要增加的事务功能的业务方法的名称“）
+Object myAround(){
+    开启事务，spring给你开
+    try{
+           buy(1001,10);
+           spring的事务管理.commit();       
+       }catch（Exception e）{
+               spring的事务管理.rollback（）；
+        }
+}
+3、在你的方法上增加注解@Transactional，
+
+
+事务在bean标签里面的代码
+<!--声明事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--连接数据库，指定数据源-->
+        <property name="dataSource" ref="myDataSource"/>
+    </bean>
+    <!--开启事务注解驱动，告诉spring将会使用注解管理事务，创建代理管理
+    transaction-manager表示事务管理器id
+   -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <tx:advice id="myAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="buy" propagation="REQUIRED" isolation="DEFAULT"
+             rollback-for="java.lang.NullPointerException,com.qqzworkText.excp.NotEnoughException"/>
+            <!--可以定义多个，name是方法名-->
+            <tx:method name="add*"/>
+        </tx:attributes>
+    </tx:advice>
+    <!--配置aop-->
+    <aop:config>
+        <!--配置切入点表达式，指定哪些包内需要使用事务
+        id：切入点表达式名称，唯一
+        expression 切入点表达式，指定哪些类要应用事务。aspectj会代理创建-->
+        <aop:pointcut id="servicePt" expression="execution=(* *..service..*.*(..))"/>
+        <!--配置增强器，关联Advice和pointcut-->
+        <aop:addvisor addvice-ref="myAdvice" pointcut-ref="servicePt"/>
+    </aop:config>
+
+
+
+
+
+
+
+
+
+

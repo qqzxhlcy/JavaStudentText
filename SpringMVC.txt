@@ -1,0 +1,129 @@
+springMVC要做的就是用注解Controller来创建对象，然后放在springmvc的容器中
+Controller注解创建的是个普通类对象，不是servlet，springmvc赋予了一些额外的功能
+web开发底层是servlet对象，springMVC中有一个servlet对象：DispatcherServlet
+DispatcherServlet：负责接收用户的所有请求，用户把请求给了DispatcherServlet，DispatcherServlet又会把请求转发给controller对象后处理
+
+
+    <!--声明注册SpringMVC的核心对象DispatcherServlet对象
+    需要在tomcat服务器启动后就创建DispatcherServlet对象实例
+    创建DispatcherServlet实例对象的理由：在创建DispatcherServlet对象的过程中，会同时创建springmvc容器对象
+    读取它的配置文件。当配置文件中的对象都创建好之后，就可以直接使用-->
+    <servlet>
+        <servlet-name>springmvc</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!--当服务启动后，会去访问这个配置文件[/WEB-INF/springmvc-servlet.xml]-->
+        <init-param>
+            <!--指定springmvc的位置-->
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath:springmvc.xml</param-value>
+        </init-param>
+        <!--现在tomcat服务器启动的时候，这个servlet还没被创建
+        如果我希望它被创建，加load-on-startup:-->
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>springmvc</servlet-name>
+        <!--使用框架的时候，url-pattern可以使用两种值
+        1、扩展名，语法是*.xxx，xxx是自定意的。常用是*.do,*.action,*.mvc等
+        2、使用斜杠-->
+        <url-pattern>*.do</url-pattern>
+    </servlet-mapping>
+
+
+
+
+/**
+ * 创建处理器对象的
+ */
+@Controller
+
+    /**
+     * 准备使用dosome（）方法来处理some.do请求
+     * 需要使用注解@RequestMapping:请求映射，作用是把一个请求地址和一个方法绑定在一起
+     * 一个请求指定一个方法
+     * 属性：
+     *     value：是一个String,表示请求对象的url。必须是唯一
+     *     使用时推荐以“/”
+     * 位置：
+     *     1、在方法的上面。2、在类的上面
+     */
+
+    /**
+     * 返回值：ModelAndView
+     * model:数据，请求处理完成后，要显示给用户的数据
+     * View，视图，比如jsp等
+     */
+    @RequestMapping(value = "/some.do")
+    public ModelAndView dosome(){
+        ModelAndView mv = new ModelAndView();
+        //添加数据，框架会把数据放在request作用域
+        //request.setAttribute("msg","欢迎使用springmvc做web开发")
+        mv.addObject("msg","欢迎使用springmvc做web开发");
+        mv.addObject("fun","执行的是dosome方法");
+
+        //指定视图
+        //框架对视图的使用指定的是forword操作
+        mv.setViewName("/show.jsp");
+
+        return mv;
+    }
+
+
+过滤器:在xml文件中
+<filter>
+        <filter-name>characterEncodingFilter</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+
+        <!--注册过滤器，解决乱码问题-->
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>utf-8</param-value>
+        </init-param>
+
+        <!--强制请求HttpRequest使用encoding编码-->
+        <init-param>
+            <param-name>forceRequestEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+
+        <!--强制请求HttpRequest使用encoding编码-->
+        <init-param>
+            <param-name>forceResponseEncoding</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>characterEncodingFilter</filter-name>
+        <!--强制所有请求通过过滤器-->
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+
+@RequestParam（value：xxx）  xxx代表要转的数据
+@RequestParam有一个参数  required=“true”表示必须传参，为“false”时，可以为空
+还有一个参数produces,produces="text/plain,charset="utf-8".这样就能解决乱码问题
+
+
+
+返回值：
+ModelAndView:返回值是视图和方法
+String :返回值如果只想做视图的跳转，最好使用String
+void：不能表示数据，也不能返回视图。用于ajax，可以通过HttpServletResponse
+Object:返回值是数据	
+现在做Jaon数据格式，步骤
+1、加入json工具库依赖，springmvc默认使用jackson
+2、在springmvc配置中加<mvc:annotation-driver>注解驱动
+代表json = om.writeValueAsString(student)
+3、在处理器方法上面加注解@ResponseBody
+
+@ResponseBody这个注解能够自动转发数据
+<mvc:annotation-driven />
+
+    <!--转发资源给tomcat处理-->
+    <mvc:default-servlet-handler/>
+但是这个时候是将所有资源给了tomcat服务器，导致@RequestMapping这个注解失效
+所有为了解决这个问题，<mvc:annotation-driven />需要加上这个标签
+
+静态资源访问第二种：
+图片：<mvc:resources mapping="/image/**" location="/image/"/>
+网页：<mvc:resources mapping="/html/**" location="/html/"/>

@@ -1,0 +1,126 @@
+Mybatis的三层架构：
+1、界面层 ：和用户打交道的，接收用户的请求参数，显示返回结果
+2、业务逻辑层：接收界面层传输的数据，计算逻辑，调用数据库。获取数据
+3、数据访问层：访问数据库，执行对数据的查询、修改、删除等
+
+队应的包：
+界面层：controller包（servlet）
+业务逻辑层：service包（XXXXservice类）
+数据访问层：dao包（xxxDao类）
+
+
+动态代理：
+1、使用SqlSession.getMapper（dao接口.classs）获取这个dao接口的对象
+2、传入参数：从java代码中把数据传入到mapper文件的sql语句中
+1）parameterType：写在mapper文件中的一个属性。表示dao接口中方法的参数的数据类型
+2）一个简单类型的参数：
+在mapper文件获取一个简单类型的一个参数的值。使用#（任意字符）
+<select id="selectStudentById" parameterType="java.lang.Integer" resultType="org.example.dao.Student">
+        select * from student where id=#{id}
+    </select>
+3）多个参数。使用@Param命名参数
+接口public List<Student> selectMulitParam(String name, Integer age)
+使用@Param（”参数名“） String name 
+在mapper文件中
+<select id="selectMulitParam"  resultType="org.example.dao.Student">
+        select * from student where id=#{myname} or age=#{myage}
+    </select>
+
+3）多个参数。使用java对象
+在mapper文件中：
+<select id="selectMulitParam"  resultType="org.example.dao.Student">
+        select * from student where id=#{name} or age=#{age}
+    </select>
+其中#{}的完整写法应该是：
+#{name,javaType = java.lang.String,jdbcType = VACHAR}
+可以直接省略为#{name}
+
+
+mybatis的输出结果
+mybatis执行了sql语句，得到了java对象
+1、resultType结果类型，指sql语句执行完后，数据转为java对象
+返回简单类型的时候直接写返回值类型或者全限定名称就行
+比如我 想要输出这个表里面有多少行数据，查询语句为
+select count(*) from student 
+这个时候我在result赋值为“int”。最后显示的结果就是一个数字
+
+<typeAliases>
+        <!--type里面的是自定义的全限定名称-->
+        <!--alias是你最后设定的别名-->
+        <typeAlias type="org.example.dao.Student" alias="stu"/>
+    </typeAliases>
+其中还有一个方法能够定义别名，那就是package
+<package name="org.example.dao.Student">
+它的意思是说里，包中所有的类，类名就是别名
+
+resultMap:结果映射。指定列名和java对象的属性对应的关系
+使用resultMap需要在mapper文件中写以下语句：
+<resultMap id="" type="">
+
+</resultMap>
+(column:列名)
+(property：java类型的属性名)
+(主键使用主键名)
+<id column="xx" property="xx">
+(非主键)
+<result column="xx" property="xx">
+
+
+动态SQL。创建对象时需要是用java对象作为参数
+1、<if>是判断条件的
+语法：<if text = "判断java对象的属性值">
+                     部分sql语句
+          </if>
+
+2、<where>用来包含多个<if>的，当多个if有一个成立，其他不成立时，它会自动去除那些不成立
+的if、and、or等
+
+3、<foreach>循环语句
+<foreach collection="" item="" open="" close="" sqparator="">
+</foreach>
+
+collection：表示接口中的方法参数的类型。如果是数组就用array，如果是list集合就是list
+item：自定义的。表示数组和集合成员的变量
+open：循环开始时的字符
+close：循环结束时的字符
+sqparator：集合成员之间的分割符号
+
+4、sql代码片段，就是复用一些语句
+步骤：
+1）、<sql id="自定义的名称唯一"> sql语句，表名，字段<sql>
+2）、在你想使用这段语句的地方：<include refid="上面的id">
+
+数据库的属性配置文件：把数据库连接信息放在一个单独的文件中，和mybatis主配置文件分开。目
+的是便于修改，保存、处理多个数据库的信息
+1、在resources目录中定义一个属性配置文件，xxxx.properties，例如 JDBC.properties
+在属性配置文件中，定义数据。格式是key=value
+key一般使用  .  做多级目录
+例如 jdbc.mysql.driver    ,   jdbc.driver,   mydriver
+jdbc.driver=com.mysql.jdbc.Driver
+jdbc.url=jdbc:mysql//.....
+jdbc.username=root
+jdbc.password=123456
+
+2、在mybatis的主配置文件，使用<property>指定文件的位置，在需要使用值得地方 ￥{key}
+
+
+3、mapper文件可以使用package来指定路径（用包来指定）
+用包来指定需要满足mapper和dao接口在同一路径下，且名字也要一样，区分大小写
+<package name="org/example/dao"/>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

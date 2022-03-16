@@ -1,0 +1,61 @@
+        //网页表示使用Text加html
+        response.setContentType("text/html");
+        System.out.println("以GET方式被调用");
+        Integer money = 100;
+        //io流输出
+        PrintWriter out = response.getWriter();
+       //调用print输出，如果用out.write(money)输出，将会输出ASCII码值输出 
+       out.print(money);
+
+
+
+        String result = "http://www.baidu.com";
+        //这里调用的方法是将result中的值赋予location中，输出网站
+        response.sendRedirect(result);
+
+
+HttpServletRequest接口：
+作用：
+1、可以保存请求协议包中的“请求行”信息
+2、可以读取保在Http请求协议包中“请求头”或者“请求体中“的请求参数信息
+3、可以代替向浏览器向Http服务器申请资源文件调用
+
+
+//通知对象使用utf-8字符集进行解码
+request.setCharacterEncoding("utf-8")
+
+<!--servlet描述信息-->
+<!--任一一个servlet都对应了一个servlet-mappi-->
+<servlet>
+     <!--名字可以自取-->
+     <servlet-name></servlet-name>
+     <!--class必须是带包名的全限定类名-->
+     <servlet-class><servlet-class>
+</servlet>
+
+<!--servlet映射信息-->
+<servlet-mapping>
+     <!--名字随意，但是必须和上面对应-->
+     <servlet-name></servlet-name>
+     <!--这里需要写一个路径，可以随便写，但是必须以“/”开头。作用是在网页端输入-->
+     <servlet-pattern><servlet-pattern>
+</servlet-mapping>
+
+
+要想在浏览器显示数据，使用io流就行，PrintWriter out = respose.getWriter();
+out.print("xxxx");
+即可
+
+response.setContentType("text/html")
+设置响应格式为文本或者html代码
+
+
+
+
+
+
+
+
+
+
+
